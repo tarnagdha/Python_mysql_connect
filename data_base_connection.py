@@ -11,33 +11,53 @@ search="'%Faible%'"
 
 request="SELECT * FROM utilisateur WHERE income_group LIKE " + search
 
+def dbconnection(mysql_connector, params_connection):
+    try:
+         
+        print("connection à la base de donnée en cours")
 
-try :
-    print("connection à la base de donnée en cours")
-    connection=mc.connect(**connection_parameters)
-    if connection.is_connected():
-        print("connection à la base de donnée réussie")
+        connection = mysql_connector.connect(**params_connection)
 
-        print("recuperation du curseur")
-        cursor = connection.cursor()
+        if connection.is_connected():
+            print("connection à la base de donnée réussie")
+            return connection
+    
+    except Error as e:
+    
+        print("La connection a échoué")
+        return None
 
-        print("execution de la requete")
-        cursor.execute(request)
+object_connection = dbconnection(mc, connection_parameters)
+print(object_connection)
 
-        print("Recuperation du resultat")
-        results = cursor.fetchall()
-        
-        print("intialisation du dataframe")
-        dataframe=pd.DataFrame(results)
+def executeQuery(object_connection, query):       
+    if object_connection == None :
+        return [] 
+    
+    print("recuperation du curseur")
+    cursor = object_connection.cursor()
 
-        print("importer les resultats sous format excel")
-        dataframe.to_excel("data.xlsx")
-        print("Donnée generée sous le nom 'data'")
+    print("execution de la requete")
+    cursor.execute(query)
 
-        cursor.close()
-        connection.close()
-        
-except Error as e :
-    print("la connection a échoué", e)  
+    print("Recuperation du resultat")
+    results = cursor.fetchall()
+
+    return results
+
+data = executeQuery(object_connection, request)
+print(data)
+
+def generateExcel(arrayresults, pandas_object, pathFile):
+    
+    print("intialisation du dataframe")
+    dataframe = pandas_object.DataFrame(arrayresults)
+
+    print("importer les resultats sous format excel")
+    dataframe.to_excel(pathFile)
+    
+    print("Donnée generée sous le nom 'data'")
+
+generateExcel(data, pd, "dataExcel.xlsx")
 
 
