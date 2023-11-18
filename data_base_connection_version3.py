@@ -4,6 +4,8 @@ import pandas as pd
 
 import json
 
+import os
+
 from mysql.connector import Error
 
 from config import connection_parameters
@@ -13,9 +15,16 @@ with open("informations.json") as f :
     print("charger les données JSON")
     infoJson = json.load(f)
 
+print("Créons un chemin de dossier")
+pathDos = "C:/Users/HP/Desktop/result_request/sous_dos"
+
+print("Créont le dossier avec ses sous dossiers s'il n'existe  pas avec la methode mkdir")
+if not os.path.exists(pathDos):
+    os.makedirs(pathDos, exist_ok=True)
+
 search="'%Faible%'"
 
-request="SELECT * FROM utilisateur WHERE income_group LIKE " + search
+request="SELECT * FROM utilisateur WHERE income_group LIKE " + "'%" + infoJson["seach"] + "%'"
 
 def dbconnection(mysql_connector, params_connection):
     try:
@@ -62,8 +71,8 @@ def generateExcel(arrayresults, pandas_object, pathFile):
     print("importer les resultats sous format excel")
     dataframe.to_excel(pathFile)
     
-    print("Donnée generée sous le nom 'data'")
+    print("Donnée generée sous le nom", infoJson["filename"])
 
-generateExcel(data, pd, "dataExcel.xlsx")
+generateExcel(data, pd, pathDos + "/"+infoJson["filename"])
 
 
